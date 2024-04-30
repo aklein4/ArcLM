@@ -94,7 +94,14 @@ def get_arc_metrics(
         (fake_outputs < 0).float().mean()
     ) / 2
 
+    # calculate the pcorr metric
+    pcorr = (
+        torch.sigmoid(real_outputs).mean() +
+        (1-torch.sigmoid(fake_outputs)).mean()
+    ) / 2
+
     return DotDict(
         arc_loss=loss,
-        arc_acc=acc
+        arc_acc=acc,
+        arc_pcorr=pcorr
     )

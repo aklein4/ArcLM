@@ -47,9 +47,13 @@ def lm_metrics(input_ids, logits, padding_mask=None):
         masked_input_ids
     ).float().mean()
 
+    # calculate the pcorr metric
+    pcorr = torch.exp(masked_logp).mean()
+
     return DotDict(
         loss=loss,
         bpb=bpb,
         ppl=ppl,
-        acc=acc
+        acc=acc,
+        pcorr=pcorr
     )

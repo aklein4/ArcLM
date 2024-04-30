@@ -37,7 +37,7 @@ class T5Trainer(BaseTrainer):
         "max_eval_examples",
     ]
 
-    _metrics = ["loss", "bpb", "ppl", "acc", "arc_loss", "arc_acc"]
+    _metrics = ["loss", "bpb", "ppl", "acc", "pcorr", "arc_loss", "arc_acc", "arc_pcorr"]
 
     def __init__(
         self,

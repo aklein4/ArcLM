@@ -29,7 +29,6 @@ def arc_compute_bias(self, query_length, key_length, device=None):
     if device is None:
         device = self.relative_attention_bias.weight.device
     if __ARC_ATTENTION_SWITCH__:
-        print("switch")
         context_position = torch.arange(query_length//2, dtype=torch.long, device=device)
         memory_position = torch.arange(key_length//2, dtype=torch.long, device=device)
         
@@ -112,7 +111,6 @@ class ArcLongT5(LongT5PreTrainedModel):
 
         # Decode
         with arc_attention_switch(arc_is_active):
-            print(arc_is_active)
             decoder_outputs = self.decoder(
                 input_ids=decoder_input_ids,
                 attention_mask=decoder_attention_mask,
