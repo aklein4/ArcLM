@@ -66,7 +66,7 @@ def get_arc_metrics(
 
     real_outputs, fake_outputs = torch.split(
         arc_outputs,
-        2,
+        arc_outputs.shape[1]//2,
         dim=1
     )
     assert tuple(padding_mask.shape) == tuple(real_outputs.shape[:-1]), "Padding mask must match ARC outputs shape."
