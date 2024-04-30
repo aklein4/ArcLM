@@ -113,9 +113,9 @@ class T5Trainer(BaseTrainer):
 
         return DotDict(
             input_ids=x_a.input_ids,
-            input_mask=(x_a.attention_mask < 0.5),
+            input_mask=x_a.attention_mask,
             decoder_input_ids=x_b.input_ids,
-            decoder_attention_mask=(x_b.attention_mask < 0.5),
+            decoder_attention_mask=x_b.attention_mask,
         )
 
 
@@ -179,11 +179,11 @@ class T5Trainer(BaseTrainer):
                     )
                     arc_metrics = arc_metrics(
                         model_out.arc_output,
-                        x.decoder_attention_mask
+                        x.decoder_attention_mask<0.5
                     )
                     metrics = lm_metrics(
                         x.input_ids, model_out.lm_logits[:, :x.input_ids.shape[-1]],
-                        x.decoder_attention_mask
+                        x.decoder_attention_mask<0.5
                     )
 
                     # save metrics
@@ -213,7 +213,8 @@ class T5Trainer(BaseTrainer):
         val_loader
     ):
 
-        model.requires_grad(True)
+        for p in model.parameters():
+            p.requires_grad = True
 
         optimizer = Adafactor(model.parameters(), lr=self.lr)
         lr_scheduler = torch.optim.lr_scheduler.LinearLR(
@@ -274,11 +275,11 @@ class T5Trainer(BaseTrainer):
                     )
                     arc_metrics = arc_metrics(
                         model_out.arc_output,
-                        x.decoder_attention_mask
+                        x.decoder_attention_mask<0.5
                     )
                     metrics = lm_metrics(
                         x.input_ids, model_out.lm_logits[:, :x.input_ids.shape[-1]],
-                        x.decoder_attention_mask
+                        x.decoder_attention_mask<0.5
                     )
 
                     loss = arc_metrics.loss + metrics.loss

@@ -42,15 +42,14 @@ def get_arc_attention_mask(
         half_len,
         half_len,
         device=device,
-        dtype=bool
     )
 
     nw_mask = torch.triu(base_mask, diagonal=1)
     ne_mask = base_mask
     sw_mask = torch.triu(base_mask, diagonal=0)
-    se_mask = ~torch.diag_embed(torch.diagonal(base_mask, 0, -2, -1))
+    se_mask = 1-torch.diag_embed(torch.diagonal(base_mask, 0, -2, -1))
 
-    return torch.cat(
+    return 1-torch.cat(
         [
             torch.cat([nw_mask, ne_mask], dim=-1),
             torch.cat([sw_mask, se_mask], dim=-1)
