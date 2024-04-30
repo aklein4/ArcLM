@@ -111,9 +111,26 @@ class T5Trainer(BaseTrainer):
             max_length=self.max_length
         ).to(constants.DEVICE)
 
+        # add start token
+        pad_id = tokenizer.pad_token_id
+        x_b.input_ids = torch.cat(
+            [
+                torch.ones_like(x_b.input_ids[:, :1]) * pad_id,
+                x_b.input_ids
+            ],
+            dim=-1
+        )
+        x_b.attention_mask = torch.cat(
+            [
+                torch.ones_like(x_b.attention_mask[:, :1]),
+                x_b.attention_mask
+            ],
+            dim=-1
+        )
+
         return DotDict(
             input_ids=x_a.input_ids,
-            input_mask=x_a.attention_mask,
+            attention_mask=x_a.attention_mask,
             decoder_input_ids=x_b.input_ids,
             decoder_attention_mask=x_b.attention_mask,
         )
