@@ -13,7 +13,7 @@ from transformers.optimization import Adafactor
 from training.base_trainer import BaseTrainer
 
 from utils.training_utils import lm_metrics
-from utils import DotDict
+from utils.data_utils import DotDict
 import utils.constants as constants
 from utils.arc_utils import get_arc_input_ids, get_arc_attention_mask, get_arc_metrics
 
