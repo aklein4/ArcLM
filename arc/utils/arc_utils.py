@@ -81,6 +81,9 @@ def get_arc_metrics(
     real_outputs = real_outputs.reshape(-1)[padding_mask]
     fake_outputs = fake_outputs.reshape(-1)[padding_mask]
 
+    print(real_outputs)
+    print(fake_outputs)
+
     # loss is CNE loss
     loss = -(
         F.logsigmoid(real_outputs) +
