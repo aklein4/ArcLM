@@ -37,14 +37,13 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_URL)
 
     model = ArcLongT5.from_pretrained(MODEL_URL)
+    model.init_arc_head()
     model = model.to(constants.DEVICE)
     _ = torch.compile(model, mode="reduce-overhead", fullgraph=True)
 
     print("Loading data...")
     train_loader = SingleLoader(TRAIN_DATA_URL, train=False, debug=False)
     val_loader = FullLoader(VAL_DATA_URL, train=False, debug=False)
-
-    print(model.arc_head.weight.data)
 
     print("Train!")
     trainer = T5Trainer(
