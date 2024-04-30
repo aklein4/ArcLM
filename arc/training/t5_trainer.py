@@ -101,16 +101,16 @@ class T5Trainer(BaseTrainer):
         x_a = tokenizer(
             a,
             return_tensors="pt",
-            padding=('max_input_length' if first else True),
+            padding=('max_length' if first else True),
             truncation=True,
-            max_length=self.max_length
+            max_length=self.max_input_length
         ).to(constants.DEVICE)
         x_b = tokenizer(
             b,
             return_tensors="pt",
-            padding=('max_output_length' if first else True),
+            padding=('max_length' if first else True),
             truncation=True,
-            max_length=self.max_length
+            max_length=self.max_output_length
         ).to(constants.DEVICE)
 
         # add start token
