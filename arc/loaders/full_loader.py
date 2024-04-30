@@ -15,7 +15,7 @@ class FullLoader(BaseLoader):
         super().__init__(url, train, debug)
         
         files = hf.list_repo_files(url, repo_type="dataset")
-        self.parquets = [f for f in files if (f.endswith(".parquet") and f.contains(self._subfolder)]
+        self.parquets = [f for f in files if (f.endswith(".parquet") and f.contains(self._subfolder))]
         if self.train:
             self.parquets = [f for f in self.parquets if f.count("train")]
         else:
