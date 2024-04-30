@@ -32,7 +32,7 @@ class T5Trainer(BaseTrainer):
         "eval_freq",
         "checkpoint_freq",
         "dtype",
-        "max_Input_length",
+        "max_input_length",
         "max_output_length",
         "max_eval_examples",
     ]
@@ -101,14 +101,14 @@ class T5Trainer(BaseTrainer):
         x_a = tokenizer(
             a,
             return_tensors="pt",
-            padding=('max_length' if first else True),
+            padding=('max_input_length' if first else True),
             truncation=True,
             max_length=self.max_length
         ).to(constants.DEVICE)
         x_b = tokenizer(
             b,
             return_tensors="pt",
-            padding=('max_length' if first else True),
+            padding=('max_output_length' if first else True),
             truncation=True,
             max_length=self.max_length
         ).to(constants.DEVICE)
