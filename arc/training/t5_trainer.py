@@ -260,7 +260,7 @@ class T5Trainer(BaseTrainer):
                     ):
 
                         # handle inputs
-                        x = self._get_tokens(train_loader, tokenizer, first=step==0)
+                        x = self._get_tokens(train_loader, tokenizer, first=(step==0 and accum_step < 2))
 
                         # get reusable encodings
                         encoder_outputs = model.encode(
