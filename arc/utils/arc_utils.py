@@ -62,12 +62,12 @@ def get_arc_metrics(
     arc_outputs,
     padding_mask
 ):
-    assert arc_outputs.shape[-1] % 2 == 0, "ARC outputs must be even."
+    assert arc_outputs.shape[1] % 2 == 0, "ARC outputs must be even."
 
     real_outputs, fake_outputs = torch.split(
         arc_outputs,
         2,
-        dim=-1
+        dim=1
     )
     assert tuple(padding_mask.shape) == tuple(real_outputs.shape[:-1]), "Padding mask must match ARC outputs shape."
 

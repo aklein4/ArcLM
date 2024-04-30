@@ -194,7 +194,6 @@ class T5Trainer(BaseTrainer):
                         arc_mask,
                         x.attention_mask,            
                     )
-                    print(arc_ids.shape, arc_mask, model_out.arc_output.shape)
                     arc_metrics = get_arc_metrics(
                         model_out.arc_output,
                         x.decoder_attention_mask<0.5
