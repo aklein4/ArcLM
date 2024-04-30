@@ -213,9 +213,9 @@ class T5Trainer(BaseTrainer):
         val_loader
     ):
 
-        params = model.prepare_training(self.memory_grad)
+        model.requires_grad(True)
 
-        optimizer = Adafactor(params, lr=self.lr)
+        optimizer = Adafactor(model.parameters(), lr=self.lr)
         lr_scheduler = torch.optim.lr_scheduler.LinearLR(
             optimizer,
             start_factor=1e-10,
@@ -238,9 +238,8 @@ class T5Trainer(BaseTrainer):
                     enabled=enable_autocast
                 ):
 
-
                     # handle inputs
-                    x = self._get_tokens(val_loader, tokenizer)
+                    x = self._get_tokens(train_loader, tokenizer)
 
                     # get reusable encodings
                     encoder_outputs = model.encode(
