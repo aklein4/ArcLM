@@ -194,7 +194,8 @@ class T5Trainer(BaseTrainer):
                         arc_ids,
                         encoder_outputs,
                         arc_mask,
-                        x.attention_mask,            
+                        x.attention_mask,   
+                        arc_is_active=True         
                     )
                     arc_metrics = get_arc_metrics(
                         model_out.arc_output,
@@ -291,7 +292,8 @@ class T5Trainer(BaseTrainer):
                             arc_ids,
                             encoder_outputs,
                             arc_mask,
-                            x.attention_mask,            
+                            x.attention_mask,    
+                            arc_is_active=True        
                         )
                         arc_metrics = get_arc_metrics(
                             model_out.arc_output,

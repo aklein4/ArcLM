@@ -7,9 +7,49 @@ import torch.nn.functional as F
 import copy
 
 from transformers import LongT5Config
-from transformers.models.longt5.modeling_longt5 import LongT5PreTrainedModel, LongT5Stack
+from transformers.models.longt5.modeling_longt5 import LongT5PreTrainedModel, LongT5Stack, LongT5Attention
 
 from utils.data_utils import DotDict
+
+
+__ARC_ATTENTION_SWITCH__ = False
+
+class arc_attention_switch:
+    def __init__(self, active):
+        self.active = active
+    def __enter__(self):
+        global __ARC_ATTENTION_SWITCH__
+        __ARC_ATTENTION_SWITCH__ = self.active
+    def __exit__(self):
+        global __ARC_ATTENTION_SWITCH__
+        __ARC_ATTENTION_SWITCH__ = False
+
+def arc_compute_bias(self, query_length, key_length, device=None):
+    """Compute binned relative position bias"""
+    if device is None:
+        device = self.relative_attention_bias.weight.device
+    if __ARC_ATTENTION_SWITCH__:
+        print("switch")
+        context_position = torch.arange(query_length//2, dtype=torch.long, device=device)
+        memory_position = torch.arange(key_length//2, dtype=torch.long, device=device)
+        
+        context_position = torch.cat([context_position]*2, dim=-1)[:, None]
+        memory_position = torch.cat([memory_position]*2, dim=-1)[None, :]
+    else:
+        context_position = torch.arange(query_length, dtype=torch.long, device=device)[:, None]
+        memory_position = torch.arange(key_length, dtype=torch.long, device=device)[None, :]  
+    relative_position = memory_position - context_position  # shape (query_length, key_length)
+    relative_position_bucket = self._relative_position_bucket(
+        relative_position,  # shape (query_length, key_length)
+        bidirectional=(not self.is_decoder),
+        num_buckets=self.relative_attention_num_buckets,
+        max_distance=self.relative_attention_max_distance,
+    )
+    values = self.relative_attention_bias(relative_position_bucket)  # shape (query_length, key_length, num_heads)
+    values = values.permute([2, 0, 1]).unsqueeze(0)  # shape (1, num_heads, query_length, key_length)
+    return values
+
+LongT5Attention.compute_bias = arc_compute_bias
 
 
 class ArcLongT5(LongT5PreTrainedModel):
@@ -65,17 +105,19 @@ class ArcLongT5(LongT5PreTrainedModel):
         encoder_outputs: Tuple[Tuple[torch.Tensor]],
         decoder_attention_mask: Optional[torch.BoolTensor] = None,
         attention_mask: Optional[torch.BoolTensor] = None,
+        arc_is_active: bool = False,
     ) -> DotDict:
 
         hidden_states = encoder_outputs[0]
 
         # Decode
-        decoder_outputs = self.decoder(
-            input_ids=decoder_input_ids,
-            attention_mask=decoder_attention_mask,
-            encoder_hidden_states=hidden_states,
-            encoder_attention_mask=attention_mask,
-        )
+        with arc_attention_switch(arc_is_active):
+            decoder_outputs = self.decoder(
+                input_ids=decoder_input_ids,
+                attention_mask=decoder_attention_mask,
+                encoder_hidden_states=hidden_states,
+                encoder_attention_mask=attention_mask,
+            )
         sequence_output = decoder_outputs[0]
         
         # Rescale output before projecting on vocab
