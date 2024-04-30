@@ -13,7 +13,7 @@ class SingleLoader(BaseLoader):
         super().__init__(url, train, debug)
         
         files = hf.list_repo_files(url, repo_type="dataset")
-        self.parquets = [f for f in files if (f.endswith(".parquet") and f.contains(self._subfolder))]
+        self.parquets = [f for f in files if (f.endswith(".parquet") and self._subfolder in f)]
         if self.train:
             self.parquets = [f for f in self.parquets if f.count("train")]
         else:
