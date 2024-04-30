@@ -199,7 +199,7 @@ class T5Trainer(BaseTrainer):
                         x.decoder_attention_mask<0.5
                     )
                     metrics = lm_metrics(
-                        x.input_ids, model_out.lm_logits[:, :x.input_ids.shape[-1]],
+                        x.decoder_input_ids, model_out.lm_logits[:, :x.decoder_input_ids.shape[-1]],
                         x.decoder_attention_mask<0.5
                     )
 
@@ -295,7 +295,7 @@ class T5Trainer(BaseTrainer):
                         x.decoder_attention_mask<0.5
                     )
                     metrics = lm_metrics(
-                        x.input_ids, model_out.lm_logits[:, :x.input_ids.shape[-1]],
+                        x.decoder_input_ids, model_out.lm_logits[:, :x.decoder_input_ids.shape[-1]],
                         x.decoder_attention_mask<0.5
                     )
 
