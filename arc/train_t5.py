@@ -26,7 +26,7 @@ TRAIN_CONFIG = {
     "eval_freq": 1000,
     "checkpoint_freq": 5000,
     "dtype": torch.float32,
-    "max_length": 4096,
+    "max_length": 2048,
     "max_eval_examples": 500
 }
 

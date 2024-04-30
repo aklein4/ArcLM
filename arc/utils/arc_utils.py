@@ -92,7 +92,7 @@ def get_arc_metrics(
     acc = (
         (real_outputs > 0).float().mean() +
         (fake_outputs < 0).float().mean()
-    )
+    ) / 2
 
     return DotDict(
         arc_loss=loss,

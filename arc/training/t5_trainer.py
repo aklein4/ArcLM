@@ -93,20 +93,20 @@ class T5Trainer(BaseTrainer):
         super().upload(self._log_file, self._progress_file)
 
 
-    def _get_tokens(self, loader, tokenizer):
+    def _get_tokens(self, loader, tokenizer, first=False):
         a, b = loader(self.bs)
 
         x_a = tokenizer(
             a,
             return_tensors="pt",
-            padding=True,
+            padding=('max_length' if first else True),
             truncation=True,
             max_length=self.max_length
         ).to(constants.DEVICE)
         x_b = tokenizer(
             b,
             return_tensors="pt",
-            padding=True,
+            padding=('max_length' if first else True),
             truncation=True,
             max_length=self.max_length
         ).to(constants.DEVICE)
@@ -257,7 +257,7 @@ class T5Trainer(BaseTrainer):
                 ):
 
                     # handle inputs
-                    x = self._get_tokens(train_loader, tokenizer)
+                    x = self._get_tokens(train_loader, tokenizer, first=step==0)
 
                     # get reusable encodings
                     encoder_outputs = model.encode(
@@ -299,6 +299,8 @@ class T5Trainer(BaseTrainer):
                         x.decoder_attention_mask<0.5
                     )
 
+                    eh = metrics.loss
+                    ah = arc_metrics.arc_loss
                     loss = arc_metrics.arc_loss + metrics.loss
                 
                 if enable_autocast:
