@@ -31,7 +31,7 @@ class T5Trainer(BaseTrainer):
         "eval_freq",
         "checkpoint_freq",
         "dtype",
-        "max_length"
+        "max_length",
         "max_eval_examples",
     ]
 
