@@ -57,7 +57,7 @@ class SingleLoader(BaseLoader):
             outlights.append(self.highlights[self.curr_ind])
             self.curr_ind += 1
 
-            if self.curr_ind >= len(self.data):
+            if self.curr_ind >= len(self):
                 self.curr_ind = 0
                 self.curr_file_ind += 1
 
