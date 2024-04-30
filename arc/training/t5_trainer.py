@@ -299,7 +299,7 @@ class T5Trainer(BaseTrainer):
                         x.decoder_attention_mask<0.5
                     )
 
-                    loss = arc_metrics.loss + metrics.loss
+                    loss = arc_metrics.arc_loss + metrics.loss
                 
                 if enable_autocast:
                     scaler.scale(loss).backward()

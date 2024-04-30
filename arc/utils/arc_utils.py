@@ -90,9 +90,9 @@ def get_arc_metrics(
 
     # accuracy is the number of correct predictions
     acc = (
-        (real_outputs > 0).float() +
-        (fake_outputs < 0).float()
-    ).mean()
+        (real_outputs > 0).float().mean() +
+        (fake_outputs < 0).float().mean()
+    )
 
     return DotDict(
         arc_loss=loss,
