@@ -216,7 +216,7 @@ class T5Trainer(BaseTrainer):
         for p in model.parameters():
             p.requires_grad = True
 
-        optimizer = Adafactor(model.parameters(), lr=self.lr)
+        optimizer = Adafactor(model.parameters(), lr=self.lr, relative_step=False)
         lr_scheduler = torch.optim.lr_scheduler.LinearLR(
             optimizer,
             start_factor=1e-10,
