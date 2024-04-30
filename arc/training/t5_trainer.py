@@ -319,7 +319,10 @@ class T5Trainer(BaseTrainer):
                         self.log.train[m].append(metrics[m].item())
                     except:
                         self.log.train[m].append(arc_metrics[m].item())
-                pbar.set_postfix({k: v.item() for k, v in metrics.items()})
+                pbar.set_postfix(
+                    {k: v.item() for k, v in metrics.items()} |
+                    {k: v.item() for k, v in arc_metrics.items()}
+                )
 
                 if (step+1) % self.eval_freq == 0 or step == self.num_steps-1:
                     self.evaluate(tokenizer, model, val_loader)

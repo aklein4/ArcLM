@@ -20,8 +20,8 @@ NAME = "arc-longt5"
 
 TRAIN_CONFIG = {
     "lr": 0.001,
-    "bs": 1,
-    "accums": 128,
+    "bs": 4,
+    "accums": 128//4,
     "num_steps": 2000,
     "warmup_steps": 1,
     "eval_freq": 100,
@@ -29,7 +29,7 @@ TRAIN_CONFIG = {
     "dtype": torch.bfloat16,
     "max_input_length": 2048,
     "max_output_length": 512,
-    "max_eval_examples": 100
+    "max_eval_examples": 500
 }
 
 
