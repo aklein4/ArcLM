@@ -19,14 +19,16 @@ VAL_DATA_URL = 'cnn_dailymail'
 NAME = "arc-longt5"
 
 TRAIN_CONFIG = {
-    "lr": 0.001/128,
+    "lr": 0.001,
     "bs": 1,
+    "accums": 128,
     "num_steps": 10000,
     "warmup_steps": 1,
     "eval_freq": 1000,
     "checkpoint_freq": 5000,
-    "dtype": torch.float32,
-    "max_length": 1024,
+    "dtype": torch.bfloat16,
+    "max_input_length": 2048,
+    "max_output_length": 512,
     "max_eval_examples": 100
 }
 

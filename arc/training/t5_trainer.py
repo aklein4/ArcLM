@@ -26,12 +26,14 @@ class T5Trainer(BaseTrainer):
     _hyperparams = [
         "lr",
         "bs",
+        "accums",
         "num_steps",
         "warmup_steps",
         "eval_freq",
         "checkpoint_freq",
         "dtype",
-        "max_length",
+        "max_Input_length",
+        "max_output_length",
         "max_eval_examples",
     ]
 
@@ -248,65 +250,65 @@ class T5Trainer(BaseTrainer):
             for step in pbar:
 
                 model.train()
+                for accum_step in tqdm(range(self.accums), leave=False):
 
-                enable_autocast = self.dtype != torch.float32
-                with torch.autocast(
-                    device_type=str(constants.DEVICE),
-                    dtype=(torch.float16 if not enable_autocast else self.dtype),
-                    enabled=enable_autocast
-                ):
+                    enable_autocast = self.dtype != torch.float32
+                    with torch.autocast(
+                        device_type=str(constants.DEVICE),
+                        dtype=(torch.float16 if not enable_autocast else self.dtype),
+                        enabled=enable_autocast
+                    ):
 
-                    # handle inputs
-                    x = self._get_tokens(train_loader, tokenizer, first=step==0)
+                        # handle inputs
+                        x = self._get_tokens(train_loader, tokenizer, first=step==0)
 
-                    # get reusable encodings
-                    encoder_outputs = model.encode(
-                        x.input_ids,
-                        x.attention_mask
-                    )
+                        # get reusable encodings
+                        encoder_outputs = model.encode(
+                            x.input_ids,
+                            x.attention_mask
+                        )
 
-                    # get pos/neg samples
-                    with torch.no_grad():
-                        logits = model(
-                            x.decoder_input_ids,
+                        # get pos/neg samples
+                        with torch.no_grad():
+                            logits = model(
+                                x.decoder_input_ids,
+                                encoder_outputs,
+                                x.decoder_attention_mask,
+                                x.attention_mask,
+                            ).lm_logits
+
+                            arc_ids = get_arc_input_ids(
+                                x.decoder_input_ids,
+                                logits
+                            )
+                            arc_mask = get_arc_attention_mask(
+                                arc_ids.shape,
+                                arc_ids.device
+                            )
+                        
+                        # get predictions
+                        model_out = model(
+                            arc_ids,
                             encoder_outputs,
-                            x.decoder_attention_mask,
-                            x.attention_mask,
-                        ).lm_logits
+                            arc_mask,
+                            x.attention_mask,            
+                        )
+                        arc_metrics = get_arc_metrics(
+                            model_out.arc_output,
+                            x.decoder_attention_mask<0.5
+                        )
+                        metrics = lm_metrics(
+                            x.decoder_input_ids, model_out.lm_logits[:, :x.decoder_input_ids.shape[-1]],
+                            x.decoder_attention_mask<0.5
+                        )
 
-                        arc_ids = get_arc_input_ids(
-                            x.decoder_input_ids,
-                            logits
-                        )
-                        arc_mask = get_arc_attention_mask(
-                            arc_ids.shape,
-                            arc_ids.device
-                        )
+                        loss = arc_metrics.arc_loss + metrics.loss
                     
-                    # get predictions
-                    model_out = model(
-                        arc_ids,
-                        encoder_outputs,
-                        arc_mask,
-                        x.attention_mask,            
-                    )
-                    arc_metrics = get_arc_metrics(
-                        model_out.arc_output,
-                        x.decoder_attention_mask<0.5
-                    )
-                    metrics = lm_metrics(
-                        x.decoder_input_ids, model_out.lm_logits[:, :x.decoder_input_ids.shape[-1]],
-                        x.decoder_attention_mask<0.5
-                    )
+                    if enable_autocast:
+                        scaler.scale(loss).backward()
+                    else:
+                        loss.backward()
 
-                    eh = metrics.loss
-                    ah = arc_metrics.arc_loss
-                    loss = arc_metrics.arc_loss + metrics.loss
-                
-                if enable_autocast:
-                    scaler.scale(loss).backward()
-                else:
-                    loss.backward()
                 optimizer.step()
                 optimizer.zero_grad(True)
                 lr_scheduler.step()
