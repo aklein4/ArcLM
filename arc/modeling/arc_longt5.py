@@ -15,7 +15,6 @@ from utils.data_utils import DotDict
 class ArcLongT5(LongT5PreTrainedModel):
     _keys_to_ignore_on_load_unexpected = [
         r"decoder.block.0.layer.1.EncDecAttention.relative_attention_bias.weight",
-        r"arc_head.weight"
     ]
     _tied_weights_keys = ["encoder.embed_tokens.weight", "decoder.embed_tokens.weight", "lm_head.weight"]
 
