@@ -250,7 +250,6 @@ class T5Trainer(BaseTrainer):
         with tqdm(range(self.num_steps), desc="Training") as pbar:
             for step in pbar:
 
-                model.train()
                 for accum_step in tqdm(range(self.accums), leave=False):
 
                     enable_autocast = self.dtype != torch.float32
@@ -263,17 +262,18 @@ class T5Trainer(BaseTrainer):
                         # handle inputs
                         x = self._get_tokens(train_loader, tokenizer, first=(step==0 and accum_step < 2))
 
-                        # get reusable encodings
-                        encoder_outputs = model.encode(
-                            x.input_ids,
-                            x.attention_mask
-                        )
-
                         # get pos/neg samples
+                        model.eval()
                         with torch.no_grad():
+                            # get eval encodings
+                            eval_outputs = model.encode(
+                                x.input_ids,
+                                x.attention_mask
+                            )
+
                             logits = model(
                                 x.decoder_input_ids,
-                                encoder_outputs,
+                                eval_outputs,
                                 x.decoder_attention_mask,
                                 x.attention_mask,
                             ).lm_logits
@@ -288,6 +288,11 @@ class T5Trainer(BaseTrainer):
                             )
                         
                         # get predictions
+                        model.train()
+                        encoder_outputs = model.encode(
+                            x.input_ids,
+                            x.attention_mask
+                        )
                         model_out = model(
                             arc_ids,
                             encoder_outputs,
