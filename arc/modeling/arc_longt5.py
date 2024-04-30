@@ -20,7 +20,7 @@ class arc_attention_switch:
     def __enter__(self):
         global __ARC_ATTENTION_SWITCH__
         __ARC_ATTENTION_SWITCH__ = self.active
-    def __exit__(self):
+    def __exit__(self, *args):
         global __ARC_ATTENTION_SWITCH__
         __ARC_ATTENTION_SWITCH__ = False
 
@@ -112,6 +112,7 @@ class ArcLongT5(LongT5PreTrainedModel):
 
         # Decode
         with arc_attention_switch(arc_is_active):
+            print(arc_is_active)
             decoder_outputs = self.decoder(
                 input_ids=decoder_input_ids,
                 attention_mask=decoder_attention_mask,
